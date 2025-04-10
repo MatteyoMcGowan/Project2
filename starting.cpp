@@ -67,3 +67,53 @@ int main() {
 	}
   }
 }
+
+  /*
+  // make 1000 runs  
+  for (int countrun = 0; countrun < 1000; countrun++) {
+	take_picture();
+	update_screen();
+	int totRed = 0;
+	int totInt = 0;
+	double redness = 0.0;
+	int middleRed = 0;
+	int middleGreen = 0;
+	int middleBlue = 0;
+    // for all pixels in latest image
+    for (int row = 0 ; row < 240 ; row++) {	
+		for (int col = 0; col < 320; col++) {
+			totRed = totRed + (int)get_pixel(row, col, 0);
+			totInt = totInt + (int)get_pixel(row, col, 3);
+			redness = (double)totRed/(3.0*(double)totInt);
+			
+			if (row > 110 && row < 140 && col > 150 && col < 170){
+				middleRed = (int)get_pixel(row, col, 0);
+				middleGreen = (int)get_pixel(row, col, 1);
+				middleBlue = (int)get_pixel(row, col, 2);
+				}
+			
+
+		}
+	}
+	
+	cout<<" countrun: "<<countrun<<endl<<endl;
+	cout<<" Total red: "<<totRed<<endl;
+	cout<<", Total intensity: "<<totInt<<endl;
+	cout<<", redness : "<<redness<<endl<<endl;
+	cout<<", Middle Red: "<<middleRed<<endl<<endl;
+	cout<<", Middle Green: "<<middleGreen<<endl<<endl;
+	cout<<", Middle Blue: "<<middleBlue<<endl<<endl;
+	
+	if (middleRed < 140){
+		cout<<"THE RUBY HAS BEEN STOLEN"<<endl;
+	}else {
+		cout<<"The Ruby is safe..."<<endl;
+		} 
+				
+	
+	sleep1(500); // slow down a bit to make display easier 2fps
+	
+  }  
+  close_screen_stream();
+  return 0;
+} */

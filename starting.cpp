@@ -1,85 +1,91 @@
-/*
- * The code below is meant to detect whether the Red Ruby
- * is present. The starategy implemented by the code is not very effective. 
- * Study the code so that you understand what the strategy is and how 
- * it is implemented. Then design and implement a better startegy.
- * 
- * */
 #include <iostream>
 #include "E101.h"
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
 bool detectRedRuby(int& top, int& bottom, int& left, int& right) {
-    int numPixels = 240 * 320;
-    int redThreshold = 0;
-    int avgBrightness = 0;
-    int totalRed = 0;
-    int totalGreen = 0;
-    int totalBlue = 0;
-    int totalBrightness = 0;
+	
+	take_picture();  
+
     int redPixelCount = 0;
+    top = 240;
+    bottom = 0;
+    left = 320;
+    right = 0;
 
-    take_picture();  
-
- 
-    for (int row = 0; row < 240; row++) {    
+    for (int row = 0; row < 240; row++) {
         for (int col = 0; col < 320; col++) {
             int red = (int)get_pixel(row, col, 0);
             int green = (int)get_pixel(row, col, 1);
             int blue = (int)get_pixel(row, col, 2);
+            int total = red + green + blue;
 
-            totalRed += red;
-            totalGreen += green;
-            totalBlue += blue;
-            totalBrightness += (red + green + blue) / 3;
-
-           
-            if (red > redThreshold && green < 100 && blue < 100) {
+            // changes depending on lights levels
+            if (total > 60 && red > green * 1.4 && red > blue * 1.4) {
                 redPixelCount++;
-                if (top > row) top = row;
-                if (bottom < row) bottom = row; 
-                if (left > col) left = col;
-                if (right < col) right = col;
+
+                if (row < top) top = row;
+                if (row > bottom) bottom = row;
+                if (col < left) left = col;
+                if (col > right) right = col;
             }
         }
     }
 
-    // If any red pixels are found, calculate dynamic redThreshold
-    if (redPixelCount > 0) {
-        avgBrightness = totalBrightness / numPixels;
-        int avgRed = totalRed / redPixelCount;
-
-        
-        redThreshold = avgRed * 1.2; 
-        redThreshold = redThreshold * (avgBrightness / 128);  // Adjust based on brightness
-        return true;  // Red Ruby found
-    }
-
-    return false;  
+    return redPixelCount > 50;  // Avoid false positives
 }
 
 int main() {
     int err = init(0);
-    cout << "Error: " << err << endl;
+    cout << "Init result: " << err << endl;
     open_screen_stream();
 
-    int top = 240;
-    int bottom = 0;
-    int left = 320;
-    int right = 0;
+    int top, bottom, left, right;
+    int refX = -1;
+    int refY = -1;
+    bool rubyDetectedInitially = false;
 
     while (true) {
         bool isFound = detectRedRuby(top, bottom, left, right);
 
         if (isFound) {
-            cout << "Red Ruby Found!" << endl;
-            cout << "Top: " << top << ", Bottom: " << bottom << ", Left: " << left << ", Right: " << right << endl;
+            int centerX = (left + right) / 2;
+            int centerY = (top + bottom) / 2;
+
+            if (!rubyDetectedInitially) {
+                refX = centerX;
+                refY = centerY;
+                rubyDetectedInitially = true;
+                cout << "Initial Ruby position set at (" << refX << ", " << refY << ")" << endl; // midddle of star
+                set_digital(0, 0); // Turn off alert
+            } else {
+                int dx = abs(centerX - refX);
+                int dy = abs(centerY - refY);
+
+                if (dx > 20 || dy > 20) {
+                    cout << "Ruby stolen!" << endl;
+                    set_digital(0, 1); // Turn on alert
+                } else {
+                    cout << "The precious is safe..." << endl;
+                    set_digital(0, 0); // Turn off alert
+                }
+            }
+
+            cout << "Top: " << top << ", Bottom: " << bottom 
+                 << ", Left: " << left << ", Right: " << right << endl;
         } else {
-            cout << "Red Ruby Not Found!" << endl;
+            cout << "Red Ruby not found!" << endl;
+            if (rubyDetectedInitially) {
+                cout << "ALERT: Red Ruby possibly stolen!" << endl;
+                set_digital(0, 1); // Turn on alert
+            } else {
+                set_digital(0, 0); // No alert yet
+            }
         }
-		sleep1(500);
+
+        sleep1(500); // wait 500ms
     }
 
     return 0;

@@ -5,18 +5,17 @@
 
 using namespace std;
 
-// Constants
 const int MIN_RED_PIXELS = 50;
 const int MIN_TOTAL_COLOR = 60;
-const float RED_COLOR_RATIO = 1.4f;
+const float redColorRatio = 1.4f; // typically to be red it must be 40% more red than green or blue
 const int moveThreshold = 20;
 
-// Helper function to check if a pixel is red
+// pixel is red ?
 bool isRedPixel(int red, int green, int blue) {
     int total = red + green + blue;
     return total > MIN_TOTAL_COLOR && 
-           red > green * RED_COLOR_RATIO && 
-           red > blue * RED_COLOR_RATIO;
+           red > green * redColorRatio && 
+           red > blue * redColorRatio;
 }
 
 // Detects the red star and updates bounding box
@@ -49,6 +48,7 @@ bool detectRedRuby(int& top, int& bottom, int& left, int& right) {
     return redPixelCount > MIN_RED_PIXELS;
 }
 
+
       //crosshair at the center of the star
 void drawCrosshair(int centerX, int centerY, int size, char r, char g, char b) {
     
@@ -61,6 +61,21 @@ void drawCrosshair(int centerX, int centerY, int size, char r, char g, char b) {
     }
 }
 
+
+/* Opens stream
+ * sets variables and ruby to false
+ * while(true) infinate loop
+ * if ruby isfound by detectRedRuby 
+ * set if (isfound) will = true
+ * intilises the center
+ * set centerX/y = ref x/y 
+ * second loop around dx dy to see if there is any changes
+ * if the abs value goes above 20
+ * ruby stolen
+ * else fine
+ */
+
+
 int main() {
     int err = init(0);
     cout << "Init result: " << err << endl;
@@ -70,34 +85,35 @@ int main() {
     int top, bottom, left, right;
     int refX = -1;
     int refY = -1;
+    
     bool rubyDetectedInitially = false;
 
     while (true) {
         bool isFound = detectRedRuby(top, bottom, left, right);
-
+		
+	    // calculates center 
         if (isFound) {
             int centerX = (left + right) / 2;
             int centerY = (top + bottom) / 2;
-
+			
             if (!rubyDetectedInitially) {
                 refX = centerX;
                 refY = centerY;
                 rubyDetectedInitially = true;
                 cout << "Initial Ruby position set at (" << refX << ", " << refY << ")" << endl;
-                set_digital(0, 0); // Turn off alert
             } else {
                 int dx = abs(centerX - refX);
                 int dy = abs(centerY - refY);
 
                 if (dx > moveThreshold || dy > moveThreshold) {
-                        cout << "ALERT: Red Ruby has moved!" << endl;
-                        // drawRectangle(top, bottom, left, right, 255, 0, 0); // Red
-                        drawCrosshair(centerX, centerY, 10, 255, 0, 0); // Red crosshair
+                        cout << "The red ruby has been moved" << endl;
+                       
+                        drawCrosshair(centerX, centerY, 10, 255, 0, 0); // Red crosshair (stolen)
                     
                 } else {
-                        cout << "Red Ruby is in place." << endl;
-                        // drawRectangle(top, bottom, left, right, 0, 255, 0); // Green
-                        drawCrosshair(centerX, centerY, 10, 0, 255, 0); // Green crosshair
+                        cout << "The red ruby is safe..." << endl;
+                     
+                        drawCrosshair(centerX, centerY, 10, 0, 255, 0); // Green crosshair (fine)
 					}
 				}
 			} 

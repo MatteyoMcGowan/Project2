@@ -8,7 +8,7 @@ using namespace std;
 const int MIN_RED_PIXELS = 50;
 const int MIN_TOTAL_COLOR = 60;
 const float redColorRatio = 1.4f; // typically to be red it must be 40% more red than green or blue
-const int moveThreshold = 20;
+const int moveThreshold = 10;
 
 // pixel is red ?
 bool isRedPixel(int red, int green, int blue) {
@@ -60,8 +60,6 @@ void drawCrosshair(int centerX, int centerY, int size, char r, char g, char b) {
         set_pixel(row, centerX, r, g, b);
     }
 }
-
-
 /* Opens stream
  * sets variables and ruby to false
  * while(true) infinate loop
@@ -79,8 +77,9 @@ void drawCrosshair(int centerX, int centerY, int size, char r, char g, char b) {
 int main() {
     int err = init(0);
     cout << "Init result: " << err << endl;
-    
     open_screen_stream();
+	int streamResult = open_screen_stream();
+	cout << "Stream result" << streamResult <<endl;
 
     int top, bottom, left, right;
     int refX = -1;
@@ -90,7 +89,7 @@ int main() {
 
     while (true) {
         bool isFound = detectRedRuby(top, bottom, left, right);
-		
+
 	    // calculates center 
         if (isFound) {
             int centerX = (left + right) / 2;
@@ -100,29 +99,29 @@ int main() {
                 refX = centerX;
                 refY = centerY;
                 rubyDetectedInitially = true;
-                cout << "Initial Ruby position set at (" << refX << ", " << refY << ")" << endl;
+                cout << "Ruby position set at (" << refX << ", " << refY << ")" << endl;
             } else {
                 int dx = abs(centerX - refX);
                 int dy = abs(centerY - refY);
 
                 if (dx > moveThreshold || dy > moveThreshold) {
-                        cout << "The red ruby has been moved" << endl;
+                        cout << "The red ruby has been stolen" << endl;
                        
                         drawCrosshair(centerX, centerY, 10, 255, 0, 0); // Red crosshair (stolen)
                     
                 } else {
-                        cout << "The red ruby is safe..." << endl;
+                        cout << "The red ruby is all Good..." << endl;
                      
                         drawCrosshair(centerX, centerY, 10, 0, 255, 0); // Green crosshair (fine)
 					}
 				}
 			} 
-
-            
+		convert_camera_to_screen();	
+		update_screen();	
+        sleep1(25);  
         }
 
-        update_screen(); 
-        sleep1(500); 
+	close_screen_stream();
     
 
     return 0;
